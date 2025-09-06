@@ -1,2 +1,5 @@
 /.history/
 /.vscode/
+/.cursor/
+/env/
+./__pycache__/

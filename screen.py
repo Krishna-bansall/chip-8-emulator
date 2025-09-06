@@ -2,6 +2,7 @@ import pygame, math
 
 
 class Screen():
+    
     def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((64*10,32*10))
@@ -11,8 +12,7 @@ class Screen():
         self.frame = 0
         self.pos = pygame.Vector2(0,0)
 
-    def run_screen_loop(self):
-        
+    def run_screen_loop(self):    
         print("Screen Module Attached!")
         
         while self.Running:
@@ -23,7 +23,6 @@ class Screen():
             self.screen.fill("yellow")
             pygame.draw.circle(self.screen, "red", self.pos, 50 )
             
-            keys = pygame.key.get_pressed()
 
             self.pos.y -= math.sin(self.frame / 10)
             self.pos.x += math.sin(self.frame / 10)
@@ -33,7 +32,7 @@ class Screen():
             print(self.frame)
             self.frame += 1            
                 
+    def exit():
+        pygame.quit()
+        
 
-
-
-# pygame.quit()

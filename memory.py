@@ -4,12 +4,10 @@ class Memory():
         self.memory = bytearray(4096)        
         self.pointer = 0
     
-    
     # Methods of writing to the memory    
     def write(self, address, buffer:bytearray):
         # write the buffer to the memory at the address        
         self.pointer = address
-        
         for i, byte in enumerate(buffer):
             self.memory[self.pointer + i] = byte
             
