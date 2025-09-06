@@ -1,8 +1,7 @@
 import pygame, math
 
 
-class Screen():
-    
+class Screen():    
     def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((64*10,32*10))
@@ -20,17 +19,27 @@ class Screen():
                 if event.type == pygame.QUIT:
                     Running = False
                     
-            self.screen.fill("yellow")
-            pygame.draw.circle(self.screen, "red", self.pos, 50 )
+            self.screen.fill("black")
             
+            sprite = [0xF0, 0x90, 0xF0, 0x90, 0xF0]
+            
+            chip_surface = pygame.Surface((8, len(sprite)))
+            # chip_surface.fill((255,255,255))
+            
+            for y, byte in enumerate(sprite):
+                for x in range(8):
+                    if byte & (0x80 >> x):
+                        chip_surface.set_at((x,y), (255, 255,255))
+            
+            scaled = pygame.transform.scale(chip_surface, (8*10,len(sprite)*10))
 
-            self.pos.y -= math.sin(self.frame / 10)
-            self.pos.x += math.sin(self.frame / 10)
+            self.screen.blit(scaled, (0,0))
+            
 
             pygame.display.flip()
             dt = self.clock.tick(60)
-            print(self.frame)
             self.frame += 1            
+            
                 
     def exit():
         pygame.quit()
