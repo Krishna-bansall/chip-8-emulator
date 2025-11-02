@@ -1,24 +1,14 @@
 import pygame, math
 
-
 class Screen():    
     def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((64*10,32*10))
-        self.clock = pygame.time.Clock()
-        self.Running = True
-        self.dt=0 # delta time?  
-        self.frame = 0
         self.pos = pygame.Vector2(0,0)
 
-    def run_screen_loop(self):    
-        print("Screen Module Attached!")
-        
-        while self.Running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    Running = False
-                    
+
+    def render(self):    
+
             self.screen.fill("black")
             
             sprite = [0xF0, 0x90, 0xF0, 0x90, 0xF0]
@@ -33,12 +23,7 @@ class Screen():
             
             scaled = pygame.transform.scale(chip_surface, (8*10,len(sprite)*10))
 
-            self.screen.blit(scaled, (0,0))
-            
-
-            pygame.display.flip()
-            dt = self.clock.tick(60)
-            self.frame += 1            
+            self.screen.blit(scaled, (0,0))      
             
                 
     def exit():

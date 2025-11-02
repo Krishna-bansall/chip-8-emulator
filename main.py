@@ -1,5 +1,6 @@
 from memory import Memory
 from screen import Screen
+import pygame
 
 # Custom font data
 font = bytearray([
@@ -22,17 +23,41 @@ font = bytearray([
 ])
 
 
+
 class CHIP8():
-  
     def __init__(self) -> None:
         self.ram = Memory()
         self.ram.write(0x050, font)
+        self.screen = Screen()
         print("Ram Memory Attached!")
-        self.screen = Screen()        
+        self.stack = []
+        
+    def stack_push (self, item):
+        self.stack.insert(0, item)
 
+    def stack_pop(self):
+        self.stack.pop(0)
 
-    
 
 chip = CHIP8()
-chip.screen.run_screen_loop()
+
+Running = True
+frame = 0
+    
+
+while Running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            Running = False
+        
+        # if event.type == pygame.KEYDOWN:
+        #     # keyboard(event)
+                            
+    chip.screen.render()
+    
+    
+    pygame.display.flip()
+    dt = pygame.time.Clock().tick(60)
+    frame += 1        
+
 # chip.ram.read_all()
