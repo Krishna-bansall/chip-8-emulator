@@ -22,8 +22,7 @@ font = bytearray([
     0xF0, 0x80, 0xF0, 0x80, 0x80   # F
 ])
 
-
-
+keyboard = [49,50,51,52,113,119,101,114,97,115,100,102, 122,120,99,118]
 class CHIP8():
     def __init__(self) -> None:
         self.ram = Memory()
@@ -43,21 +42,21 @@ chip = CHIP8()
 
 Running = True
 frame = 0
-    
 
-while Running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            Running = False
+
+# while Running:
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             Running = False
         
-        # if event.type == pygame.KEYDOWN:
-        #     # keyboard(event)
-                            
-    chip.screen.render()
+#         if event.type == pygame.KEYDOWN:
+#             if event.key in keyboard:
+#                 print(event.unicode.lower())                            
+#     chip.screen.render()
     
     
-    pygame.display.flip()
-    dt = pygame.time.Clock().tick(60)
-    frame += 1        
+#     pygame.display.flip()
+#     # dt = pygame.time.Clock().tick(60)
+#     # frame += 1        
 
 # chip.ram.read_all()
