@@ -7,22 +7,18 @@ class Screen():
         self.pos = pygame.Vector2(0,0)
 
 
-    def render(self):    
-
+    def render(self, sprite, height):    
             self.screen.fill("black")
-            
-            sprite = [0xF0, 0x90, 0xF0, 0x90, 0xF0]
-            
-            chip_surface = pygame.Surface((8, len(sprite)))
-            # chip_surface.fill((255,255,255))
+                        
+            pygame.Surface()
+            sprite_surface = pygame.Surface((height, len(sprite)))
             
             for y, byte in enumerate(sprite):
-                for x in range(8):
+                for x in range(height):
                     if byte & (0x80 >> x):
-                        chip_surface.set_at((x,y), (255, 255,255))
+                        sprite_surface.set_at((x,y), (255, 255,255))
             
-            scaled = pygame.transform.scale(chip_surface, (8*10,len(sprite)*10))
-
+            scaled = pygame.transform.scale(sprite_surface, (8*10,len(sprite)*10))
             self.screen.blit(scaled, (0,0))      
             
                 

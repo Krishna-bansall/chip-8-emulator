@@ -26,9 +26,14 @@ keyboard = [49,50,51,52,113,119,101,114,97,115,100,102, 122,120,99,118]
 
 program_counter = 511
 
-registers = {}
-for i in range(15):
-    registers[format(i, '0x')] = ""
+registers = {"Vi":""}
+for i in range(16):
+    registers['V' + format(i, '0x')] = ""
+
+def hex_to_int(number):
+    n = int('0x' + str(number), 16)
+    return n
+
 class CHIP8():
     def __init__(self) -> None:
         # 0 - 512 is reserved for interpreter, 512 - 4095 program data.
@@ -62,22 +67,37 @@ chip.mem_write(font, 0)
 
 
 def decode(instruction):
-    n1 = instruction[0:1]
-    match n1.lower():
+    n1 = instruction[0:1].lower()
+    n2 = instruction[1:2].lower()
+    n3 = instruction[2:3].lower()
+    n4 = instruction[3:4].lower()
+    
+    match n1:
         case '0':
             # clear_screen()
             print("case 0 trig")
         case '1':
+            val = hex_to_int(instruction[1:])
+            program_counter = val
             print("case 1 trig")
+
         case '6':
-            print("case 6 trig")
+            registers['V' + n2] = hex_to_int(instruction[2:])
+
         case '7':
-            print("case 7 trig")
+            registers['V' + n2] += hex_to_int(instruction[2:])
+
         case 'a':
-            print("case A trig")
+            registers['Vi'] = hex_to_int(instruction[1:])
         case 'd':
             print("case D trig")
-    
+            
+    if (n1.lower != '1'):
+        program_counter += 2
+        
+    return
+
+
 print("Chip8 emulator start")
 path = 'ibm.ch8'
 
@@ -90,16 +110,22 @@ chip.mem_write(rom_arr, 511)
 #     print(hex(byte), end=' ')
 
 while Running:
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            Running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key in keyboard:
+                print(event.unicode.lower())                            
+   
     current_instruction = format(chip.memory[program_counter], '02x') + format(chip.memory[program_counter + 1], '02x')
     decode(current_instruction)
-    program_counter += 2
 
+    # pygame.display.flip()
+  
     if program_counter >= 1000: Running = False
 
 # while Running:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             Running = False
         
 #         if event.type == pygame.KEYDOWN:
 #             if event.key in keyboard:
@@ -107,7 +133,6 @@ while Running:
 #     chip.screen.render()
     
     
-#     pygame.display.flip()
 #     # dt = pygame.time.Clock().tick(60)
 #     # frame += 1        
 
