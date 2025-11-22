@@ -31,7 +31,7 @@ class Cpu():
         self.memory = bytearray(4096)
         
         self.pointer = 0     
-        self.pc = 511
+        self.pc = 512
         self.screen = Screen()
         self.stack = []        
         self.current_instruction : hex
@@ -66,17 +66,27 @@ class Cpu():
             
     def op_6xnn(self, instruction):
         second_nibble = (instruction & 0x0F00)    
-        self.registers['V' + str(second_nibble)] = instruction & 0x00FF
+        self.registers['V' + str(second_nibble >> 8)] = instruction & 0x00FF
 
     def op_7xnn(self, instruction):
         second_nibble = (instruction & 0x0F00)    
-        self.registers['V' + str(second_nibble)] += instruction & 0x00FF
+        self.registers['V' + str(second_nibble >> 8)] += instruction & 0x00FF
 
     def op_annn(self, instruction):
         self.registers['Vi'] = instruction & 0x0FFF
     
-    def op_dxyn(self, instruction): ...
-    
+    def op_dxyn(self, instruction):
+        X = (instruction & 0x0F00) 
+        Y = (instruction & 0x00F0) 
+        N = (instruction & 0x000F)
+        
+        x_coordinate = self.registers['V' + str(X >> 8)]
+        y_coordinate = self.registers['V' + str(Y >> 4)]
+        pointer = self.registers['Vi']
+        sprite = self.memory[pointer: pointer + N]
+        
+        self.screen.render(sprite, x_coordinate, y_coordinate, height = N)
+        
     def set_current_instruction(self, instruction):
         self.current_instruction = instruction
     
@@ -85,12 +95,15 @@ class Cpu():
         byte_b = self.memory[addr + 1]
         return byte_a << 8 | byte_b
     
+    def clear_screen():
+        Screen.cls()
+    
     def execute(self):
         instruction = self.current_instruction
         first_nibble = (instruction & 0xf000) >> 12
             
         match first_nibble:
-            case 0: print("case 0 trig")
+            case 0: self.clear_screen
             case 1: self.op_1nnn(instruction)                 
             case 6: self.op_6xnn(instruction)
             case 7: self.op_7xnn(instruction)       
@@ -133,16 +146,14 @@ def main() -> None:
         cpu.reset_flags()
         
         print(current_instruction, hex(current_instruction))
+        print('pc', cpu.pc, cpu.pc - 511)
+        print(cpu.registers)
+
         pygame.display.flip()
     
-
-    #     chip.screen.render()
-        
-        
-    #     # dt = pygame.time.Clock().tick(60)
-    #     # frame += 1        
-
-    # chip.ram.read_all()
+     
+        dt = pygame.time.Clock().tick(60)
+        frame += 1        
 
 
 if __name__ == '__main__':
