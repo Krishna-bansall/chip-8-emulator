@@ -1,4 +1,4 @@
-from memory import Memory
+# from memory import Memory
 from screen import Screen
 import pygame
 
@@ -24,90 +24,98 @@ font = bytearray([
 
 keyboard = [49,50,51,52,113,119,101,114,97,115,100,102, 122,120,99,118]
 
-registers = {"Vi":""}
-for i in range(16):
-    registers['V' + format(i, '0x')] = ""
 
-def hex_to_int(number):
-    n = int('0x' + str(number), 16)
-    return n
-
-def decode(instruction):
-    
-    first_nibble = (instruction & 0xf000) >> 12
-    second_nibble = (instruction & 0x0F00)
-    global program_counter
-        
-    match first_nibble:
-        
-        case 0:
-            # clear_screen()
-            print("case 0 trig")
-        case 1:
-            val = instruction & 0x0FFF
-            program_counter = val
-            print("case 1 trig")
-
-        case 6:
-            registers['V' + str(second_nibble)] = instruction & 0x00FF
-
-        case 7:
-            registers['V' + str(second_nibble)] += instruction & 0x00FF
-
-        case 0xA:
-            registers['Vi'] = instruction & 0x0FFF
-        
-        case 0xD:
-            print("case D trig")
-            
-    if (first_nibble != 1):
-         program_counter += 2
-        
-    return
-
-
-class Chip8():
+class Cpu():
     def __init__(self) -> None:
         # 0 - 512 is reserved for interpreter, 512 - 4095 program data.
         self.memory = bytearray(4096)
-        self.pointer = 0     
-        self.program_counter = 511
-        self.screen = Screen()
-        self.stack = []
         
+        self.pointer = 0     
+        self.pc = 511
+        self.screen = Screen()
+        self.stack = []        
+        self.current_instruction : hex
+        self.instruction_is_1nnn = False
+            
+        self.registers = {"Vi":""}
+        for i in range(16):
+            self.registers['V' + format(i, '0x')] = ""       
+        
+      
     def mem_write (self, buffer, index):
         self.pointer = index
         for i, byte in enumerate(buffer):
             self.memory[self.pointer + i] = byte
-            
         self.pointer += len(buffer) 
     
     def stack_push (self, item):
         self.stack.insert(0, item)
 
-    def set_pc(self, val):
-        self.program_counter = val
-    
     def stack_pop(self):
         self.stack.pop(0)
 
+    def set_pc(self, val):
+        self.pc = val
+    def reset_flags(self):
+        self.instruction_is_1nnn = False
+    # opcodes
+    def op_1nnn(self, instruction):
+        val = instruction & 0x0FFF
+        self.pc = val
+        self.instruction_is_1nnn = True
+            
+    def op_6xnn(self, instruction):
+        second_nibble = (instruction & 0x0F00)    
+        self.registers['V' + str(second_nibble)] = instruction & 0x00FF
+
+    def op_7xnn(self, instruction):
+        second_nibble = (instruction & 0x0F00)    
+        self.registers['V' + str(second_nibble)] += instruction & 0x00FF
+
+    def op_annn(self, instruction):
+        self.registers['Vi'] = instruction & 0x0FFF
+    
+    def op_dxyn(self, instruction): ...
+    
+    def set_current_instruction(self, instruction):
+        self.current_instruction = instruction
+    
+    def fetch_instruction(self, addr):
+        byte_a =  self.memory[addr]
+        byte_b = self.memory[addr + 1]
+        return byte_a << 8 | byte_b
+    
+    def execute(self):
+        instruction = self.current_instruction
+        first_nibble = (instruction & 0xf000) >> 12
+            
+        match first_nibble:
+            case 0: print("case 0 trig")
+            case 1: self.op_1nnn(instruction)                 
+            case 6: self.op_6xnn(instruction)
+            case 7: self.op_7xnn(instruction)       
+            case 0xA: self.op_annn(instruction)  
+            case 0xD: self.op_dxyn(instruction)
+                
+    
 
 def main() -> None:
-    chip = Chip8()
-
+    cpu = Cpu()
     Running = True
     frame = 0
 
-    chip.mem_write(font, 0)
+    cpu.mem_write(font, 0)
 
     print("Chip8 emulator start")
     path = 'ibm.ch8'
 
     rom_obj = open(path, "rb")
     rom_arr = bytearray(rom_obj.read())
-    chip.mem_write(rom_arr, 511)
+    cpu.mem_write(rom_arr, cpu.pc)
 
     while Running:
+        pc = cpu.pc
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Running = False
@@ -115,18 +123,19 @@ def main() -> None:
                 if event.key in keyboard:
                     print(event.unicode.lower())                            
     
-        current_instruction = (chip.memory[program_counter] << 8)  | chip.memory[program_counter + 1]
-        # decode(current_instruction)
-        print(current_instruction)
+        current_instruction = cpu.fetch_instruction(pc)
+        cpu.set_current_instruction(current_instruction)
+        cpu.execute()
+        
+        if cpu.instruction_is_1nnn == False:
+             cpu.set_pc(pc + 2)
+        
+        cpu.reset_flags()
+        
+        print(current_instruction, hex(current_instruction))
         pygame.display.flip()
     
-        if program_counter >= 1000: Running = False
 
-    # while Running:
-            
-    #         if event.type == pygame.KEYDOWN:
-    #             if event.key in keyboard:
-    #                 print(event.unicode.lower())                            
     #     chip.screen.render()
         
         
